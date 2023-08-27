@@ -1,0 +1,23 @@
+{
+	"name": "@musakui/kaizoku",
+	"description": "download HLS video",
+	"license": "MIT",
+	"version": "0.0.1",
+	"type": "module",
+	"files": [
+		"types",
+		"lib"
+	],
+	"main": "./lib/index.js",
+	"types": "./types/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./types/index.d.ts",
+			"import": "./lib/index.js"
+		}
+	},
+	"scripts": {
+	},
+	"devDependencies": {
+	}
+}
