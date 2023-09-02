@@ -8,6 +8,9 @@ export interface VideoOptions {
 	/** function to get chunks from chunklist */
 	getChunks?: (cl: string) => string[]
 
-	/** function to get chunklist url from playlist */
-	getChunkList?: (pl: string) => string
+	/** function to select chunklist */
+	selectChunklist?: (cls: string[]) => string
+
+	/** function to get chunklist urls from playlist */
+	getChunkLists?: (pl: string) => string[]
 }
