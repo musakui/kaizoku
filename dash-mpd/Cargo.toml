@@ -1,0 +1,9 @@
+[package]
+name = "dash-mpd"
+version = "0.0.1"
+licence = "MIT"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.40.0", features = ["rt-multi-thread", "macros"] }
+dash-mpd = { version = "0.17.2", default-features = false, features = ["fetch", "compression", "rustls-tls", "scte35"] }
