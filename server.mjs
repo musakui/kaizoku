@@ -15,11 +15,11 @@ const completeDir = `${cwd}/${process.env.COMPLETE_DIR || 'complete'}`
 /** @type {Map<string, { msgs: string[] }>} */
 const progress = new Map()
 
-/** @param {string} msg */
-const log = (msg) => {
-	const dt = (new Date()).toLocaleTimeString('en-GB')
-	console.log(`\x1b[36m${dt}\x1b[0m ${msg}`)
-}
+/**
+ * @param {string} msg
+ * @param {string | number} cn
+ */
+const col = (msg, cn) => `\x1b[${cn}m${msg}\x1b[0m`
 
 /**
  * @param {string} path
@@ -64,7 +64,7 @@ const server = createServer(async (req, res) => {
 })
 
 server.listen(port, '0.0.0.0', () => {
-	log(`[SV] server running on port ${port}`)
+	console.info(`[SV] server running on port ${port}`)
 	const dirp = [queueDir, progressDir, completeDir]
 		.map((dn) => mkdir(dn, { recursive: true }))
 	Promise.allSettled(dirp).then(() => refresh())
@@ -93,7 +93,7 @@ async function refresh() {
 	} catch (err) {
 		return
 	}
-	const state = { msgs: [] }
+	const state = { msgs: [], start: new Date(), error: null }
 	progress.set(fn, state)
 	try {
 		const item = await readJson(ppath)
@@ -102,25 +102,30 @@ async function refresh() {
 		if (!item.kid) throw new Error(`no kid`)
 		if (!item.key) throw new Error(`no key`)
 		if (!item.out) throw new Error(`no out`)
-		log(`[DL] ${fn} (${item.out})`)
+		console.info(`${col('[DL]', 36)} ${fn} (${item.out})`)
 		state.info = item
 		const dash = spawn(BIN_PATH, [item.kid, item.key, item.out, item.url])
 		await new Promise((resolve, reject) => {
 			dash.on('spawn', () => resolve())
 			dash.on('error', (err) => reject(err))
 		})
-		dash.stderr.on('data', (dt) => log(`[ERR] ${dt}`))
+		dash.stderr.on('data', (dt) => {
+			state.error = dt
+			console.error(`${col(fn, 31)} ${dt}`)
+		})
 		dash.stdout.on('data', (dt) => state.msgs.push(`${dt}`))
 		dash.on('close', async () => {
-			await rename(ppath, cpath)
-			log(`[OK] ${fn}`)
+			const dt = (new Date() - state.start) / 1000 / 60
+			if (!state.error) await rename(ppath, cpath)
+			const hd = state.error ? col('[ND]', 31) : col('[OK]', 32)
+			console.info(`${hd} ${fn} (${dt.toFixed(2)} mins)`)
 			progress.delete(fn)
 			if ((await readJson(confFile))?.run) queueRefresh(3)
 		})
 		state.proc = dash
 		queueRefresh(9)
 	} catch (err) {
-		log(`[ERR] ${fn}: ${err}`)
+		console.error(`${col(fn, 31)} ${err}`)
 		progress.delete(fn)
 		await rename(ppath, cpath)
 		queueRefresh(3)
