@@ -25,3 +25,22 @@ export interface VideoChunk {
 	/** size (bytes) */
 	size?: number
 }
+
+export type BoxInfo = {
+	name: string
+	cur: number
+	end: number
+	ver?: number
+	flags?: number
+	data?: unknown
+}
+
+export type TrunInfo = {
+	dur?: number
+	sz?: number
+}
+
+export type SencInfo = {
+	iv: Uint8Array
+	sub: [clearBytes: number, encryptedBytes: number]
+}
