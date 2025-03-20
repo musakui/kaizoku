@@ -21,14 +21,6 @@ RUN apk update && apk upgrade && \
 COPY --from=builder --chown=root:root --chmod=755 \
     /src/target/x86_64-unknown-linux-musl/release/dash-mpd /usr/local/bin/
 
-WORKDIR /app
-
-COPY server.mjs ./
-
-WORKDIR /app/data
-
-ENV TZ=Asia/Tokyo
 ENV TERM=xterm-256color
-ENV TMPDIR=/app/data/tmp
 
-CMD ["node", "/app/server.mjs"]
+ENTRYPOINT ["/usr/local/bin/dash-mpd"]
